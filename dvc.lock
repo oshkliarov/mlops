@@ -1,0 +1,32 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: 20e63ae05b0538a62342b9bd65074fc3.dir
+      size: 314355678
+      nfiles: 51888
+    - path: src/prepare.py
+      hash: md5
+      md5: 3a6a495cdf60a1dcbe5c2ef5e9ae11b7
+      size: 1695
+    outs:
+    - path: data/prepared
+      hash: md5
+      md5: da3cb7f1293c2f3492a330d457257cd6.dir
+      size: 2672871
+      nfiles: 2
+  train:
+    cmd: python src/train.py --n_estimators 100 --max_depth 10
+    deps:
+    - path: data/prepared
+      hash: md5
+      md5: da3cb7f1293c2f3492a330d457257cd6.dir
+      size: 2672871
+      nfiles: 2
+    - path: src/train.py
+      hash: md5
+      md5: f9597a474cd9a355c281aef0b0757d4c
+      size: 1650

@@ -11,3 +11,6 @@ mlruns/
 /data/*
 !/data/*.dvc
 !/data/.gitignore
+mlflow.db
+data/prepared/
+
