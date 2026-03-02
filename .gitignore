@@ -2,8 +2,12 @@ __pycache__/
 *.py[cod]
 venv/
 .env
-data/
+#data/
 models/
 .ipynb_checkpoints
 mlruns/
 .trash/
+# Ignore data contents
+/data/*
+!/data/*.dvc
+!/data/.gitignore
