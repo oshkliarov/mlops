@@ -7,8 +7,9 @@ stages:
     outs:
       - data/prepared
 
-  train:
-    cmd: python src/train.py --n_estimators 100 --max_depth 10
+  optimize:
+    cmd: python src/optimize.py
     deps:
-      - src/train.py
+      - src/optimize.py
+      - config/config.yaml
       - data/prepared

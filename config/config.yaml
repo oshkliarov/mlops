@@ -1,0 +1,35 @@
+seed: 42
+
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080" # Використовуємо 8080, як ми змінили в ЛР2
+  experiment_name: "HPO_Traffic_Signs"
+  log_model: true
+  register_model: false
+  model_name: "TrafficSignModel"
+  stage: "Staging"
+
+data:
+  # Вказуємо шлях до директорії, звідки optimize.py братиме npz файли
+  prepared_dir: "data/prepared"
+
+model:
+  type: "random_forest"
+
+hpo:
+  n_trials: 20
+  sampler: "tpe"                           # tpe | random | grid
+  metric: "accuracy"                       # використовуємо accuracy для мультикласу
+  direction: "maximize"
+  use_cv: false
+  cv_folds: 5
+
+  random_forest:
+    n_estimators: { low: 50, high: 300 }
+    max_depth: { low: 5, high: 25 }
+    min_samples_split: { low: 2, high: 10 }
+    min_samples_leaf: { low: 1, high: 5 }
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
