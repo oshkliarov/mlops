@@ -45,12 +45,12 @@ jobs:
         run: |
           mkdir -p data/raw
           cp -r data/test_raw/* data/raw/
-          python src/optimize.py
-
+          python src/prepare.py
 
       - name: Train model
         run: |
-          python src/train.py
+          python src/optimize.py
+
 
       - name: Run tests (incl. Quality Gate)
         env:
