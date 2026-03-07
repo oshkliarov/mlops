@@ -6,6 +6,11 @@ stages:
       - data/raw
     outs:
       - data/prepared
+#  train:
+#    cmd: python src/train.py --n_estimators 100 --max_depth 10
+#    deps:
+#      - src/train.py
+#      - data/prepared
 
   optimize:
     cmd: python src/optimize.py

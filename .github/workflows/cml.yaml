@@ -1,0 +1,78 @@
+name: Model CI (Train, Test, Report)
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10" # Або 3.11, залежно від того, що в тебе
+          cache: "pip"
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v2
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest flake8 black matplotlib scikit-learn
+
+      - name: Format check (black) & Lint (flake8)
+        run: |
+          black . --check --exclude 'venv|mlruns' || echo "Black formatting issues"
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      # Оскільки ми використовували локальний DVC remote у ЛР2 (../dvc_storage),
+      # ми не можемо стягнути файли з хмари (S3/Azure).
+      # Тому для ЛР ми просто згенеруємо ці файли через prepare.py.
+      - name: Prepare Data
+        run: |
+          python src/prepare.py
+
+      - name: Train model
+        run: |
+          python src/train.py
+
+      - name: Run tests (incl. Quality Gate)
+        env:
+          ACCURACY_THRESHOLD: "0.50" # Поріг для проходження
+        run: |
+          pytest tests/ -v
+
+      - name: Create CML report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Model Metrics & Report" > report.md
+          echo "### Metrics" >> report.md
+          cat metrics.json >> report.md
+          echo "" >> report.md
+          echo "### Confusion Matrix" >> report.md
+          cml publish confusion_matrix.png --md >> report.md
+          
+          # Публікуємо коментар (працює при створенні Pull Request)
+          cml comment create report.md
+
+      - name: Upload model artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: |
+            *.pkl
+            models/

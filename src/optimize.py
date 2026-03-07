@@ -128,15 +128,37 @@ def main(cfg: DictConfig) -> None:
         best_model = build_model(cfg.model.type, params=best_trial.params, seed=cfg.seed)
         best_model.fit(X_train, y_train)
 
+        # РОБИМО ПЕРЕДБАЧЕННЯ ФІНАЛЬНОЮ МОДЕЛЛЮ ДЛЯ МЕТРИК
+        y_pred = best_model.predict(X_test)
+        final_accuracy = accuracy_score(y_test, y_pred)
+
+        # 1. Збереження моделі
         os.makedirs("models", exist_ok=True)
         joblib.dump(best_model, "models/best_model.pkl")
         mlflow.log_artifact("models/best_model.pkl")
 
+        # 2. Збереження метрик у JSON (для Quality Gate у GitHub Actions)
+        import json
+        metrics_dict = {"accuracy": float(final_accuracy)}
+        with open("metrics.json", "w", encoding="utf-8") as f:
+            json.dump(metrics_dict, f, ensure_ascii=False, indent=2)
+
+        # 3. Генерація та збереження Confusion Matrix (для звіту CML)
+        import matplotlib.pyplot as plt
+        from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+        cm = confusion_matrix(y_test, y_pred)
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+        disp.plot(cmap=plt.cm.Blues)
+        plt.title("Confusion Matrix (Best Model)")
+        plt.savefig("confusion_matrix.png")
+        plt.close()  # Закриваємо графік, щоб він не висів у пам'яті
+
+        # Логування в MLflow
         if cfg.mlflow.log_model:
             mlflow.sklearn.log_model(best_model, artifact_path="model")
 
 
-# Ініціалізація Hydra
 @hydra.main(version_base=None, config_path="../config", config_name="config")
 def hydra_entry(cfg: DictConfig) -> None:
     main(cfg)
