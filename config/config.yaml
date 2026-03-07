@@ -1,7 +1,8 @@
 seed: 42
 
 mlflow:
-  tracking_uri: "http://127.0.0.1:8080" # Використовуємо 8080, як ми змінили в ЛР2
+  #tracking_uri: "http://127.0.0.1:8080" # Використовуємо 8080, як ми змінили в ЛР2
+  tracking_uri: "sqlite:///mlflow.db"
   experiment_name: "HPO_Traffic_Signs"
   log_model: true
   register_model: false
