@@ -43,7 +43,10 @@ jobs:
       # Тому для ЛР ми просто згенеруємо ці файли через prepare.py.
       - name: Prepare Data
         run: |
-          python src/prepare.py
+          mkdir -p data/raw
+          cp -r data/test_raw/* data/raw/
+          python src/optimize.py
+
 
       - name: Train model
         run: |
