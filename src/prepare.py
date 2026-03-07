@@ -12,9 +12,15 @@ def prepare_data(raw_dir, output_dir, img_size=(32, 32), limit=2000):
     csv_path = os.path.join(raw_dir, 'Train.csv')
     df = pd.read_csv(csv_path)
 
+    # Для лаби обмежуємо кількість, щоб пайплайн бігав швидко
     if limit:
-        print(f"Обмежуємо датасет до {limit} зображень для DVC-пайплайну.")
-        df = df.sample(n=limit, random_state=42)
+        # Перевіряємо, чи є в нас достатньо даних для вибірки
+        if len(df) > limit:
+            print(f"Обмежуємо датасет до {limit} зображень для DVC-пайплайну.")
+            df = df.sample(n=limit, random_state=42)
+        else:
+            print(f"Датасет малий ({len(df)} рядків). Використовуємо всі дані.")
+
 
     data, labels = [], []
     print("Підготовка зображень (Grayscale + Resize + Flatten)...")
