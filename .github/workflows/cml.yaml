@@ -58,6 +58,12 @@ jobs:
           ACCURACY_THRESHOLD: "0.50" # Поріг для проходження
         run: |
           pytest tests/ -v
+          
+
+      - name: Build Docker image
+        run: |
+          docker build -t mlops-traffic-signs:latest .
+
 
       - name: Create CML report
         env:
