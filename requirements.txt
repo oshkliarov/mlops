@@ -9,3 +9,5 @@ dvc
 optuna
 hydra-core
 pytest
+dvc[gdrive]
+apache-airflow==2.8.1
